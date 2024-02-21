@@ -31,3 +31,4 @@ authorizedPapersForEachSlots = {
 print (authorizedPapersForEachSlots)
 
 affectationMatrix = np.zeros((7,11))
+
