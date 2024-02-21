@@ -57,10 +57,10 @@ def var_y(s1, s2, c, g):
 
 # hadi constraint lowla
 for s in range(1, conference_sessions + 1):
-    aux_vars = [] # bah t3awan bih
     for c in range(1, slots + 1):
-        for l in papers_range:
-            aux_vars.extend([var_x(s, c, l)] * l)
+        vars_for_s_c = [var_x(s, c, l) for l in papers_range]
+        amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, encoding=EncType.pairwise)
+        hard_constraints.extend(amo_clause.clauses)
+print(hard_constraints)
 
-    equals_clause = CardEnc.equals(lits=aux_vars, bound=np(s))
-    hard_constraints.extend(equals_clause.clauses)
+# contrait zawja 
