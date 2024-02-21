@@ -11,17 +11,17 @@ papers_range = np.arange(3, 7)
 max_parallel_sessions = 11 
 working_groups = 20 
 npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
-session_time_slots = {
-    1: 1.33,  
-    2: 2.00,  
-    3: 2.00,  
-    4: 1.33,  
-    5: 1.33,  
-    6: 1.00,  
-    7: 1.33,   
-}
-hard_constraints = CNF()
-soft_constraints = WCNF()
+# list of groups 
+# session_time_slots = {
+#     1: 1.33,  
+#     2: 2.00,  
+#     3: 2.00,  
+#     4: 1.33,  
+#     5: 1.33,  
+#     6: 1.00,  
+#     7: 1.33,   
+# }
+constraints = WCNF()
 
 def get_number_of_papers_for_session():
     session_papers = {
@@ -42,9 +42,11 @@ def var_x(s, c, l):
     l_index = len(papers_range)
     return int(s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (papers_range[-1] - l)) ## twalah dima int madirshash type np.arrange
 
-
+print (var_x(2,2,3))
 
 max_var_x = var_x(conference_sessions, slots, papers_range[-1])
+
+# add z here
 
 
 def var_y(s1, s2, c, g):
@@ -59,8 +61,8 @@ def var_y(s1, s2, c, g):
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
         vars_for_s_c = [var_x(s, c, l) for l in papers_range]
+        # en peut le modifier 
         amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, encoding=EncType.pairwise)
-        hard_constraints.extend(amo_clause.clauses)
-print(hard_constraints)
-
-# contrait zawja 
+        constraints.extend(amo_clause.clauses)
+print(constraints)
+# write this to file 
