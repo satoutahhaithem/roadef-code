@@ -66,3 +66,19 @@ for s in range(1, conference_sessions + 1):
         constraints.extend(amo_clause.clauses)
 print(constraints)
 # write this to file 
+
+#second constraint
+
+for s in range(1, conference_sessions + 1):
+    aux_vars = []
+    for c in range(1, slots + 1):
+        for l in papers_range:
+            aux_vars.extend([var_x(s, c, l)] * l)
+
+
+    if 0 <= session_papers[s] <= len(aux_vars):
+        equals_clause = CardEnc.equals(lits=aux_vars, bound=session_papers[s], encoding=EncType.pairwise)
+        constraints.extend(equals_clause.clauses)
+    else:
+
+        print(f"Invalid bound for session {s}")
