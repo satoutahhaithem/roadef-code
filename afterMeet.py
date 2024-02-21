@@ -1,5 +1,5 @@
 import numpy as np
-from pysat.formula import CNF , WCNF
+from pysat.formula import CNF , WCNFPlus
 from pysat.card import CardEnc
 from pysat.card import EncType
 from pysat.solvers import Solver
@@ -21,7 +21,7 @@ session_time_slots = {
     7: 1.33,   
 }
 hard_constraints = CNF()
-soft_constraints = WCNF()
+soft_constraints = WCNFPlus()
 
 def get_number_of_papers_for_session():
     session_papers = {
@@ -61,6 +61,12 @@ for s in range(1, conference_sessions + 1):
         vars_for_s_c = [var_x(s, c, l) for l in papers_range]
         amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, encoding=EncType.pairwise)
         hard_constraints.extend(amo_clause.clauses)
-print(hard_constraints)
+# print(hard_constraints)
+solver = Solver(bootstrap_with=hard_constraints)
 
-# contrait zawja 
+# Check for solution and process it
+if solver.solve():
+    model = solver.get_model()
+else:
+    print("No solution found")
+print(model)
