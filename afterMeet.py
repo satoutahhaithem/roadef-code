@@ -1,5 +1,6 @@
 import numpy as np
-from pysat.formula import CNF , WCNF
+from pysat.formula import CNF , WCNF 
+from pysat.pb import PBEnc
 from pysat.card import CardEnc
 from pysat.card import EncType
 from pysat.solvers import Solver
@@ -78,14 +79,16 @@ for s in range(1, conference_sessions + 1):
 # penser a
 # the second constraint
 for s in range(1, conference_sessions + 1):
-    aux_vars = [] # for help me 
+    aux_vars = []  
+    weights = []   
+
     for c in range(1, slots + 1):
         for l in papers_range:
-            # fix this 
-            aux_vars.extend([var_x(s, c, l)] * l)
+            aux_vars.append(var_x(s, c, l))
+            weights.append(l)  # The weight is the number of papers
 
    
-    equals_clause = CardEnc.equals(lits=aux_vars, bound=session_papers[s])
+    equals_clause = PBEnc.equals(lits=aux_vars, weights=weights, bound=session_papers[s])
     constraints.extend(equals_clause.clauses)
 
 # print(constraints)
@@ -100,14 +103,14 @@ for s in range(1, conference_sessions + 1):
                 constraints.append([-var_x(s, c, l)])
 
 print(constraints)
-# 4'th constraint 
 
-for c in range(1, slots + 1):
-    vars_for_slot_c = []
-    for s in range(1, conference_sessions + 1):
-        vars_for_slot_c.append(var_z(s, c))
-    atmost_clause = CardEnc.atmost (lits=vars_for_slot_c, bound=max_parallel_sessions)
-    constraints.extend(atmost_clause.clauses)
+# 4'th constraint 
+# for c in range(1, slots + 1):
+#     vars_for_slot_c = []
+#     for s in range(1, conference_sessions + 1):
+#         vars_for_slot_c.append(var_z(s, c))
+#     atmost_clause = CardEnc.atmost (lits=vars_for_slot_c, bound=max_parallel_sessions)
+#     constraints.extend(atmost_clause.clauses)
 
 
 
