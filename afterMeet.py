@@ -52,7 +52,7 @@ def var_x(s, c, l):
 max_var_x = var_x(conference_sessions, slots, papers_range[-1])
 # add z here
 def var_z(s, c):
-    z_offset = max_var_x + 1
+    z_offset = max_var_x 
     return z_offset + (s - 1) * slots + c
 
 
@@ -66,7 +66,7 @@ def var_y(s1, s2, c, g):
     offset = max_var_x + 1 
     return offset + s1_index - (conference_sessions - s1)**2 * s2_index - (conference_sessions - s2) * c_index - (slots - c) * g_index - (working_groups - g)
 
-# hadi constraint lowla
+# the first constraint 
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
         vars_for_s_c = [var_x(s, c, l) for l in papers_range]
@@ -75,13 +75,13 @@ for s in range(1, conference_sessions + 1):
         constraints.extend(amo_clause.clauses)
 
 
-
-# hadi deuxieme 
+# penser a
+# the second constraint
 for s in range(1, conference_sessions + 1):
     aux_vars = [] # for help me 
     for c in range(1, slots + 1):
         for l in papers_range:
-            
+            # fix this 
             aux_vars.extend([var_x(s, c, l)] * l)
 
    
@@ -106,7 +106,7 @@ for c in range(1, slots + 1):
     vars_for_slot_c = []
     for s in range(1, conference_sessions + 1):
         vars_for_slot_c.append(var_z(s, c))
-    atmost_clause = CardEnc.atmost(lits=vars_for_slot_c, bound=n)
+    atmost_clause = CardEnc.atmost (lits=vars_for_slot_c, bound=max_parallel_sessions)
     constraints.extend(atmost_clause.clauses)
 
 

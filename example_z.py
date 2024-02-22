@@ -3,8 +3,8 @@ slots = 3
 max_var_x = 100  
 
 def var_z(s, c):
-    z_offset = max_var_x + 1
-    return z_offset + (s - 1) * slots + c
+    z_offset = max_var_x 
+    return z_offset + (s - 1) * slots + c 
 
 
 for s in range(1, conference_sessions + 1):
