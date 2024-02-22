@@ -11,7 +11,14 @@ papers_range = np.arange(3, 7)
 max_parallel_sessions = 11 
 working_groups = 20 
 npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
-# list of groups 
+
+# list of groups session groups 
+session_groups = [
+    [1], [2], [3], [], [], [], [6], [7], [7, 8], [10], [8], [8, 11], [5, 8], 
+    [3, 8], [7], [13], [13], [14], [], [13], [16], [16], [20], [17], [13], 
+    [], [9], [11], [11, 12], [9], [6, 19], [], [], [18], [10], [5], [16], 
+    [4, 5], [8, 12], [7, 15]
+]
 # session_time_slots = {
 #     1: 1.33,  
 #     2: 2.00,  
@@ -34,7 +41,7 @@ def get_number_of_papers_for_session():
 
 session_papers = get_number_of_papers_for_session()
 np_s = session_papers[1]
-print(np_s)
+# print(np_s)
 
 def var_x(s, c, l):
     s_index = conference_sessions * slots * len(papers_range)
@@ -42,11 +49,13 @@ def var_x(s, c, l):
     l_index = len(papers_range)
     return int(s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (papers_range[-1] - l)) ## twalah dima int madirshash type np.arrange
 
-print (var_x(2,2,3))
-
 max_var_x = var_x(conference_sessions, slots, papers_range[-1])
-
 # add z here
+def var_z(s, c):
+    z_offset = max_var_x + 1
+    return z_offset + (s - 1) * slots + c
+
+
 
 
 def var_y(s1, s2, c, g):
@@ -64,21 +73,42 @@ for s in range(1, conference_sessions + 1):
         # en peut le modifier 
         amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, encoding=EncType.pairwise)
         constraints.extend(amo_clause.clauses)
-print(constraints)
-# write this to file 
 
-#second constraint
 
+
+# hadi deuxieme 
 for s in range(1, conference_sessions + 1):
-    aux_vars = []
+    aux_vars = [] # for help me 
     for c in range(1, slots + 1):
         for l in papers_range:
+            
             aux_vars.extend([var_x(s, c, l)] * l)
 
+   
+    equals_clause = CardEnc.equals(lits=aux_vars, bound=session_papers[s])
+    constraints.extend(equals_clause.clauses)
 
-    if 0 <= session_papers[s] <= len(aux_vars):
-        equals_clause = CardEnc.equals(lits=aux_vars, bound=session_papers[s], encoding=EncType.pairwise)
-        constraints.extend(equals_clause.clauses)
-    else:
+# print(constraints)
+# write this to file 
+# 3 eme constraint
 
-        print(f"Invalid bound for session {s}")
+for s in range(1, conference_sessions + 1):
+    for c in range(1, slots + 1):
+        for l in papers_range:
+            if l > npMax[c]:
+               # j'ai travailler avec la conjunction des negation de x if l>npMax(c)
+                constraints.append([-var_x(s, c, l)])
+
+print(constraints)
+# 4'th constraint 
+
+for c in range(1, slots + 1):
+    vars_for_slot_c = []
+    for s in range(1, conference_sessions + 1):
+        vars_for_slot_c.append(var_z(s, c))
+    atmost_clause = CardEnc.atmost(lits=vars_for_slot_c, bound=n)
+    constraints.extend(atmost_clause.clauses)
+
+
+
+
