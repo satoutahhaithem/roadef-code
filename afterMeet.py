@@ -1,9 +1,12 @@
 import numpy as np
 from pysat.formula import CNF , WCNF 
-from pysat.pb import PBEnc
+# from pysat.pb import PBEnc
 from pysat.card import CardEnc
 from pysat.card import EncType
 from pysat.solvers import Solver
+import ssl
+print(ssl.OPENSSL_VERSION)
+
 
 
 conference_sessions = 40
@@ -78,21 +81,21 @@ for s in range(1, conference_sessions + 1):
 
 # penser a
 # the second constraint
-for s in range(1, conference_sessions + 1):
-    aux_vars = []  
-    weights = []   
+# for s in range(1, conference_sessions + 1):
+#     aux_vars = []  
+#     weights = []   
 
-    for c in range(1, slots + 1):
-        for l in papers_range:
-            aux_vars.append(var_x(s, c, l))
-            weights.append(l)  # The weight is the number of papers
+#     for c in range(1, slots + 1):
+#         for l in papers_range:
+#             aux_vars.append(var_x(s, c, l))
+#             weights.append(l)  # The weight is the number of papers
 
    
-    equals_clause = PBEnc.equals(lits=aux_vars, weights=weights, bound=session_papers[s])
-    constraints.extend(equals_clause.clauses)
+#     equals_clause = PBEnc.equals(lits=aux_vars, weights=weights, bound=session_papers[s])
+#     constraints.extend(equals_clause.clauses)
 
 # print(constraints)
-# write this to file 
+
 # 3 eme constraint
 
 for s in range(1, conference_sessions + 1):
@@ -102,16 +105,27 @@ for s in range(1, conference_sessions + 1):
                # j'ai travailler avec la conjunction des negation de x if l>npMax(c)
                 constraints.append([-var_x(s, c, l)])
 
-print(constraints)
-
-# 4'th constraint 
-# for c in range(1, slots + 1):
-#     vars_for_slot_c = []
-#     for s in range(1, conference_sessions + 1):
-#         vars_for_slot_c.append(var_z(s, c))
-#     atmost_clause = CardEnc.atmost (lits=vars_for_slot_c, bound=max_parallel_sessions)
-#     constraints.extend(atmost_clause.clauses)
 
 
 
+# Implementing the equivalence transformation
+for s in range(1, conference_sessions + 1):
+    for c in range(1, slots + 1):
+        z_var = var_z(s, c)
+        x_vars = [var_x(s, c, l) for l in papers_range]
 
+        
+        for x in x_vars:
+            constraints.append([-z_var, -x])
+
+        or_clause = [-x for x in x_vars] + [z_var]
+        constraints.append(or_clause)
+
+# The Forth constraint
+for c in range(1, slots + 1):
+    neg_z_vars = [-var_z(s, c) for s in range(1, conference_sessions + 1)]
+    atmost_clause = CardEnc.atmost(lits=neg_z_vars, bound=max_parallel_sessions)
+    constraints.extend(atmost_clause.clauses)
+
+# print(constraints)
+# write this to file // remember this 
