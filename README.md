@@ -60,7 +60,9 @@ for s in range(1, conference_sessions + 1):
 ```
 # The second constraint 
 2 - The subdivision of a session into slots covers all the papers in the session:
-$$ \sum_{\substack{c\in C\\ l\in L}} x_{(s,c,l)}*l  = np(s)   \qquad \forall s\in S$$
+
+
+$$ \sum_{\substack{c\in C\\ l\in L}} x_{(s,c,l)}*l  = np(s)   \qquad \forall s\in S $$
 
 ## implementation 
 ```python
@@ -83,7 +85,8 @@ for s in range(1, conference_sessions + 1):
 # The third constraint
 
 3 - The subdivision respects the maximum length of each slot:
-%$$npMin(c) \leq x_{(s,c,l)}*l \leq npMax(c)\qquad \forall (s,c,l)\in S\times C\times L$$ 
+
+$$npMin(c) \leq x_{(s,c,l)}*l \leq npMax(c)\qquad \forall (s,c,l)\in S\times C\times L$$ 
 $$ x_{(s,c,l)}*l \leq npMax(c)\qquad \forall (s,c,l)\in S\times C\times L$$ 
 
 ## implementation 
@@ -128,6 +131,8 @@ for s in range(1, conference_sessions + 1):
 ```
 # The 4'th constraint 
 4 - The number of parallel sessions is not exceeded (or is equal ?) for each slot:
+
+
 $$\sum_{\substack{s\in S\\ l\in L}} x_{(s,c,l)} \leq n \qquad \forall c \in C$$ 
 
 ## but in our code we implement it with z 
@@ -146,6 +151,8 @@ or c in range(1, slots + 1):
 # Soft constraint 
 
 We want to minimize the number of working-group conflicts in the schedule:
+
+
 $$max \sum_{\substack{(s_1,s_2,c,g)\in S\times S\times C\times G \\ s1<s2 \\ g\in WG(s_1)\cap WG(s_2)}} \overline{y_{(s_1,s_2,c,g)}}$$
 
 ## implentation 
