@@ -153,7 +153,7 @@ or c in range(1, slots + 1):
 We want to minimize the number of working-group conflicts in the schedule:
 
 
-$$max \sum_{\substack{(s_1,s_2,c,g)\in S\times S\times C\times G \\ s1<s2 \\ g\in WG(s_1)\cap WG(s_2)}} \overline{y_{(s_1,s_2,c,g)}}$$
+$$ max \sum_{\substack{(s_1,s_2,c,g)\in S\times S\times C\times G \\ s1<s2 \\ g\in WG(s_1)\cap WG(s_2)}} \overline{y_{(s_1,s_2,c,g)}} $$
 
 ## implentation 
 ```python 
