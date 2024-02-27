@@ -23,15 +23,8 @@ session_groups = [
     [], [9], [11], [11, 12], [9], [6, 19], [], [], [18], [10], [5], [16], 
     [4, 5], [8, 12], [7, 15]
 ]
-# session_time_slots = {
-#     1: 1.33,  
-#     2: 2.00,  
-#     3: 2.00,  
-#     4: 1.33,  
-#     5: 1.33,  
-#     6: 1.00,  
-#     7: 1.33,   
-# }
+
+
 constraints = WCNF()
 
 def get_number_of_papers_for_session():
@@ -53,11 +46,15 @@ def var_x(s, c, l):
     l_index = len(papers_range)
     return s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (len(papers_range) - l)
 
-max_var_x = var_x(conference_sessions, slots, papers_range[-1])
+max_var_x = var_x(conference_sessions, slots, len(papers_range))
 
 def var_z(s, c):
     z_offset = max_var_x + 1  # Start after the last x variable
-    return z_offset + (s - 1) * slots + c
+    
+  
+    return z_offset + conference_sessions*slots - (conference_sessions-s)*slots - (slots - c)
+    # work also with this 
+    # return z_offset + (s - 1) * slots + c
 
 max_var_z = var_z(conference_sessions, slots)
 # fixed y problem 

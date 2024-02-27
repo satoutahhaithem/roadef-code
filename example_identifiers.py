@@ -11,15 +11,18 @@ def var_x(s, c, l):
     s_index = conference_sessions * slots * len(papers_range)
     c_index = slots * len(papers_range)
     l_index = len(papers_range)
-    return s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (len(papers_range) - l)
+    # return s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (len(papers_range) - l)
+    return (s-1)*slots * len(papers_range)  + (c-1)*len(papers_range) + l
 
 # Calculate the maximum identifier for x variables
 max_var_x = var_x(conference_sessions, slots, papers_range[-1])
 
 # Function to generate identifiers for z variables
 def var_z(s, c):
-    z_offset = max_var_x + 1  # Ensure z variables start after x variables
+    z_offset = max_var_x   # Ensure z variables start after x variables
     return z_offset + (s - 1) * slots + c
+    # return z_offset + conference_sessions*slots - (conference_sessions-s)*slots - (slots - c)
+    
 
 # Calculate the maximum identifier for z variables
 max_var_z = var_z(conference_sessions, slots)
