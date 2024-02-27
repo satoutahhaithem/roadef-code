@@ -9,19 +9,23 @@ import ssl
 
 
 
-conference_sessions = 40
-slots = 7
-papers_range = np.arange(3, 7)  
-max_parallel_sessions = 11 
-working_groups = 20 
-npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
+# conference_sessions = 40
+# slots = 7
+# papers_range = np.arange(3, 7)  
+# max_parallel_sessions = 11 
+# working_groups = 20 
+# npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
+
+conference_sessions = 2
+slots = 2
+papers_range = np.arange(3, 4)  
+max_parallel_sessions = 2
+working_groups = 2
+npMax = {1: 4, 2: 6} 
 
 # list of groups session groups 
 session_groups = [
-    [1], [2], [3], [], [], [], [6], [7], [7, 8], [10], [8], [8, 11], [5, 8], 
-    [3, 8], [7], [13], [13], [14], [], [13], [16], [16], [20], [17], [13], 
-    [], [9], [11], [11, 12], [9], [6, 19], [], [], [18], [10], [5], [16], 
-    [4, 5], [8, 12], [7, 15]
+    [1], [1,2]
 ]
 
 
@@ -84,7 +88,7 @@ max_var_z = var_z(conference_sessions, slots)
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
         # i modify paper range to len(paperRange) , 
-        vars_for_s_c = [var_x(s, c, l) for l in len(papers_range)]
+        vars_for_s_c = [var_x(s, c, l) for l in [x for x in range(1,len(papers_range))]]
         # Ensure that vars_for_s_c contains integers
         vars_for_s_c = [var for var in vars_for_s_c]  # Convert all variables to integers
         #add global varibale here EncType.pairwise
@@ -100,7 +104,7 @@ for s in range(1, conference_sessions + 1):
     weights = []   
 
     for c in range(slots + 1):
-        for i in range(1,len(papers_range)+1):
+        for i in range(len(papers_range)):
             aux_vars.append(var_x(s, c, i+1))
             weights.append(papers_range[i])  
 
@@ -155,7 +159,7 @@ for c in range(1, slots + 1):
 
 # write this to file // remember this 
 # i add this also for the offset
-var_y = var_z(conference_sessions,slots)    #last varliable + x+y
+y_var = var_z(conference_sessions,slots)    #last varliable + x+y
 ## here soft constraints
 for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):  # Ensure s1 < s2
@@ -166,13 +170,13 @@ for s1 in range(1, conference_sessions + 1):
                 y_var = y_var + 1
                 constraints.append([-y_var], weight=1)
                 ### hard contranint of conflict treatment 
-                constraints.append([var_z(s1,c),var_z(s2,c),var_y])
+                constraints.append([var_z(s1,c),var_z(s2,c),y_var])
                 ###
 
 
 # constraint for 34 session
 for i in range (1,5):
-    constraints.append(var_z(34,i))
+    constraints.append([var_z(34,i)])
 
 constraints.to_file('output.cnf')
 #verfier mlih 
@@ -181,3 +185,5 @@ constraints.to_file('output.cnf')
 # rename the len(paperrange) in variable
 # try with rc2 solver 
 # read this https://pysathq.github.io/docs/html/api/examples/rc2.html
+# write script tp generate the new formule a
+# test rc2
