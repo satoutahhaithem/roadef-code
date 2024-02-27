@@ -187,3 +187,4 @@ constraints.to_file('output.cnf')
 # read this https://pysathq.github.io/docs/html/api/examples/rc2.html
 # write script tp generate the new formule a
 # test rc2
+# look at the new variant
