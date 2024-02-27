@@ -60,15 +60,22 @@ def var_z(s, c):
     return z_offset + (s - 1) * slots + c
 
 max_var_z = var_z(conference_sessions, slots)
-
+# fixed y problem 
 def var_y(s1, s2, c, g):
 
     
-    y_offset = max_var_z + 1
+    s1_index = conference_sessions* conference_sessions * slots * working_groups
+    s2_index = conference_sessions * slots * working_groups
+    c_index =  slots * working_groups
+    g_index =  working_groups
+    return s1_index - (conference_sessions - s1) * s2_index - (conference_sessions - s2) * c_index - (slots - c) * g_index - (g_index - g)
 
-    # Calculate the unique identifier for y variables
-    unique_index = ((s1 - 1) * conference_sessions + (s2 - 1)) * slots * working_groups + (c - 1) * working_groups + (g - 1) 
-    return y_offset + unique_index
+    
+    # y_offset = max_var_z + 1
+
+    # # Calculate the unique identifier for y variables
+    # unique_index = ((s1 - 1) * conference_sessions + (s2 - 1)) * slots * working_groups + (c - 1) * working_groups + (g - 1) 
+    # return y_offset + unique_index
 
 
 # the first constraint
@@ -120,9 +127,13 @@ for s in range(1, conference_sessions + 1):
         
         for x in x_vars:
             constraints.append([-z_var, -x])
-
-        or_clause = [-x for x in x_vars] + [z_var]
+            # modified 
+        or_clause = [x for x in x_vars] + [z_var]
         constraints.append(or_clause)
+
+
+## code added
+
 
 # The Fourth constraint
 for c in range(1, slots + 1):
@@ -135,17 +146,22 @@ for c in range(1, slots + 1):
     constraints.extend(atmost_clause.clauses)
 
 
+
 # write this to file // remember this 
 
-
+y_var = 0#last varliable + x+y
 ## here soft constraints
 for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):  # Ensure s1 < s2
         for c in range(1, slots + 1):
             common_groups = set(session_groups[s1 - 1]).intersection(session_groups[s2 - 1])
             for g in common_groups:
-                y_var = var_y(s1, s2, c, g)
+                #y_var = var_y(s1, s2, c, g)
+                y_var = y_var + 1
                 constraints.append([-y_var], weight=1)
+                ### hard contranint 
+                constraints.append([var_z(s1,c),var_z(s2,c),var_y])
+                ###
 # Implementing the conflict treatment constraint
 for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):  # Ensure s1 < s2
@@ -164,4 +180,4 @@ for s1 in range(1, conference_sessions + 1):
 
 
 constraints.to_file('output.cnf')
-    
+# decodage de var_x

@@ -29,27 +29,33 @@ max_var_z = var_z(conference_sessions, slots)
 
 
 
-# def var_y(s1, s2, c, g):
-#     # Calculating the total number of x variables
-#     total_x_vars = conference_sessions * slots * len(papers_range)
+def var_y(s1, s2, c, g):
 
-#     # Calculating the total number of z variables
-#     total_z_vars = conference_sessions * slots
+    s1_index = conference_sessions* conference_sessions * slots * working_groups
+    s2_index = conference_sessions * slots * working_groups
+    c_index =  slots * working_groups
+    g_index =  working_groups
+    return s1_index - (conference_sessions - s1) * s2_index - (conference_sessions - s2) * c_index - (slots - c) * g_index - (g_index - g)
+    # # Calculating the total number of x variables
+    # total_x_vars = conference_sessions * slots * len(papers_range)
 
-#     # The offset for y variables should be total_x_vars + total_z_vars + 1
-#     y_offset = total_x_vars + total_z_vars + 1
+    # # Calculating the total number of z variables
+    # total_z_vars = conference_sessions * slots
 
-#     # Calculate the unique identifier for y variables
-#     unique_index = ((s1 - 1) * conference_sessions + (s2 - 1)) * slots * working_groups + (c - 1) * working_groups + (g - 1)  
-#     return y_offset + unique_index
-def var_y(s1, s2, c, g, max_sessions, max_slots, max_groups):
-    # Triangular mapping for s1 and s2 combination
-    s1_s2_index = (s2 - 1) * (s2 - 2) // 2 + s1 - 1
+    # # The offset for y variables should be total_x_vars + total_z_vars + 1
+    # y_offset = total_x_vars + total_z_vars + 1
 
-    # Extending the mapping to include c and g
-    extended_index = s1_s2_index * max_slots * max_groups + (c - 1) * max_groups + g - 1
+    # # Calculate the unique identifier for y variables
+    # unique_index = ((s1 - 1) * conference_sessions + (s2 - 1)) * slots * working_groups + (c - 1) * working_groups + (g - 1)  
+    # return y_offset + unique_index
+# def var_y(s1, s2, c, g, max_sessions, max_slots, max_groups):
+#     # Triangular mapping for s1 and s2 combination
+#     s1_s2_index = (s2 - 1) * (s2 - 2) // 2 + s1 - 1
 
-    return extended_index
+#     # Extending the mapping to include c and g
+#     extended_index = s1_s2_index * max_slots * max_groups + (c - 1) * max_groups + g - 1
+
+#     return extended_index
 
 # Print examples for var_x, var_z, and var_y
 for s in range(1, conference_sessions + 1):
@@ -62,7 +68,7 @@ for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):
         for c in range(1, slots + 1):
             for g in range(1, working_groups + 1):
-                print(f"var_y({s1}, {s2}, {c}, {g}): {var_y(s1, s2, c, g,conference_sessions,slots,working_groups)}")
+                print(f"var_y({s1}, {s2}, {c}, {g}): {var_y(s1, s2, c, g)}")
                 if g == 1:  # Limit the output
                     break
             if c == 1:  # Limit the output
@@ -79,7 +85,7 @@ for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):
         for c in range(1, slots + 1):
             for g in range(1, working_groups+ 1):
-                print(f"var_y({s1}, {s2}, {c}, {g}): {var_y(s1, s2, c, g,conference_sessions,slots,working_groups)}")
+                print(f"var_y({s1}, {s2}, {c}, {g}): {var_y(s1, s2, c, g)}")
                 if g == 2:  # Limiting output for demonstration
                     break
             if c == 2:  # Limiting output for demonstration
