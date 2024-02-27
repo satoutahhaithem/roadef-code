@@ -1,11 +1,11 @@
 import numpy as np
 from pysat.formula import CNF , WCNF 
-# from pysat.pb import PBEnc
+from pysat.pb import PBEnc
 from pysat.card import CardEnc
 from pysat.card import EncType
 from pysat.solvers import Solver
-import ssl
-print(ssl.OPENSSL_VERSION)
+# import ssl
+# print(ssl.OPENSSL_VERSION)
 
 
 
@@ -127,5 +127,5 @@ for c in range(1, slots + 1):
     atmost_clause = CardEnc.atmost(lits=neg_z_vars, bound=max_parallel_sessions)
     constraints.extend(atmost_clause.clauses)
 
-# print(constraints)
+print(constraints)
 # write this to file // remember this 
