@@ -1,0 +1,259 @@
+\documentclass{article}
+%\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage[hang,flushmargin]{footmisc}
+
+
+\title{ROADEF SCHEDULING PROBLEM}
+\author{Sami Cherif}
+\date{January 2024}
+\setlength\parindent{0pt}
+
+\begin{document}
+
+\maketitle
+
+%\section{Introduction}
+\textbf{Data}\\
+
+- $S :$ set of conference sessions \\
+- $G :$ set of working groups \\
+- $C :$ set of available slots\\
+- $L :$ set of authorized amounts of papers per parallel session\\
+
+- $n :$ maximum (exact ?) number of parallel sessions per slot\\
+- $np(s) :$ number of papers in sessions $s\in S$\\
+- $npMax(c):$ maximum number of authorized papers for each parallel session in slot $c\in C$\\
+%- $npMin(c):$ minimum number of authorized paper per slot\\
+
+- $WG(s)\subseteq G :$ working groups associated to session $s\in S$\\
+
+\textbf{ROADEF Case Study}\\
+
+- 40 programmed sessions\footnote{Initially 52 with 6 canceled sessions for lack of submissions, 2 sessions dedicated to the best student paper and the master award which are not managed by the organization committee and 4 merged pairs of sessions for insufficient number of submissions.}:
+    $$ S=\{1,2,\dots,40\}$$
+- 20 working groups\footnote{We could also think about adding the more generic GDR RO working group which was not considered in the handmade partitioning since it is related to many sessions}:
+$$ G = \mbox{\scriptsize \{TADJ,DAAO,ROSA,ROET,ROES,DOR,META,GT2L,OR,CAGDO,ORIGIN,P2LS,}$$\vspace*{-0.8cm} $$\mbox{\scriptsize ROQ,ATOM,ROCT,GOTHA,POC,SCALE,COSMOS,OM\} }
+$$
+$\;\;$ or to simplify :
+$$ G = \{1,2,\dots,20\}$$
+- 7 parallel session slots for the 3 days duration of  the conference : $$C = \{1,2,3,4,5,6,7\}$$ 
+- At least 3 papers per parallel session\footnote{Otherwise the session is too short, i.e. less than one hour, since the allocated presentation and Q\&A time per paper is 20m.}  and at most 6\footnote{Otherwise the session is too long, i.e. more than 2 hours.} :
+$$L=\{3,4,5,6\}$$
+- At most (exactly ?) 11 parallel sessions\footnote{Originally, this value could go as far as 15 which corresponds to the available classrooms in the conference site but became 11 after pruning canceled, merged and other sessions, a decision enacted by the organization committee chair. Note that, in general, a higher value for this parameter, entails more complex logistics and more resources to manage the parallel sessions. As such it could be interesting to optimize with respect to this parameter or with respect to both the number of parallel sessions and working group conflicts.}:
+    $$ n \leq 11$$
+
+- The number of papers per session (307 papers in total) and the working groups are detailed in the following table:
+
+\begin{center} \hspace*{-4cm} \scriptsize
+\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+ \textbf{Session s} & \textbf{Label} & \textbf{np(s)} &  \textbf{Groups} & \textbf{WG(s)} \\ 
+ \hline
+ 
+ 1 & Theorie Algorithmique de la Décision et des Jeux & 14 & TADJ & $\{1\}$\\ 
+ 
+ 2 & Données, Apprentissage Automatique et Optimisation & 23 & DAAO & $\{2\}$ \\ 
+ 
+ 3 & Recherche Opérationnelle et Santé & 12 & ROSA & $\{3\}$\\ 
+ 
+ 4 & Méthodes avancées et applications pour les problèmes de Cutting and Packing & 9 & & $\emptyset$ \\
+ 
+ 5 & Intégration des méthodes d'apprentissage dans les métaheuristiques
+ & 9 & & $\emptyset$\\ 
+ 
+ 6 & Optimisation bi-niveaux et applications
+ & 6 & & $\emptyset$ \\ 
+ 
+ 7 & Décision et Optimisation Robuste
+ & 10 & DOR & \{6\}\\
+ 
+ 8 & Avancées récentes à base de métaheuristiques
+ & 4 & META & \{7\} \\
+
+ 9 & Méthodes approchées pour les tournées de véhicules
+ & 10 & META, GT2L & $\{7,8\}$\\ 
+ 
+ 10 & Complexité, Approximation et Graphes
+ & 7 & CAGDO & $\{10\}$ \\ 
+ 
+ 11 & Optimisation des opérations dans les entrepôts logistiques
+ & 6 & GT2L & $\{8\}$\\ 
+ 
+ 12 & Problème de gestion de ressource dans la chaine logistique
+ & 5 & GT2L, ORIGIN & $\{8,11\}$  \\
+ 
+ 13 & Logistique durable & 3 & GT2L, ROES & $\{5,8\}$\\ 
+ 
+ 14 & Problème de logistique en santé 
+ & 5 & GT2L, ROSA & $\{3,8\}$ \\ 
+ 
+ 15 &Applications des métaheuristiques pour l'optimisation des systèmes industriels
+ & 6 & META & \{7\}\\
+ 
+ 16 & Développement d'algorithmes quantiques pour l'optimisation 
+ & 4 & ROQ & \{13\} \\
+
+ 17 & Application d'algorithmes quantiques pour l'optimisation 
+ & 3 & ROQ & $\{13\}$\\ 
+ 
+ 18 & Optimisation multiobjectif  
+ & 12 & ATOM & $\{14\}$ \\ 
+ 
+ 19 & Transport Ferroviaire & 7 & & $\emptyset$\\
+ 
+ 20 & Méthodes de Résolution pour les Problèmes de Transport et de Tournées de Véhicules 
+ & 16 & GT2L & \{13\} \\
+
+ 21 & Heuristiques et algorithmes d'approximation pour les problèmes d'ordonnancement
+ & 4 & GOTHA & $\{16\}$\\ 
+ 
+ 22 & Nouveaux modèles/tendances en matière d'ordonnancement
+ & 5 & GOTHA & $\{16\}$ \\ 
+ 
+ 23 & Programmation Mathématique Non Linéaire 
+ & 14 & OM & $\{20\}$\\ 
+ 
+ 24 & Approches polyédrales, formulations étendues et décomposition en programmation entière
+ & 11 & POC & $\{17\}$ \\
+ 
+ 25 & Algorithmes hybrides classiques-quantiques
+ & 4 & ROQ & $\{13\}$\\ 
+ 
+ 26 & Sur les meilleures pratiques de programmation et leur lien avec la théorie
+ & 3 & & $\emptyset$ \\ 
+ 
+ 27 & Optimisation dans les réseaux télécoms
+ & 10 & OR & \{9\}\\
+ 
+ 28 & Ordonnancement et durabilité
+ & 6 & ORIGIN & \{11\} \\
+
+ 29 & Planification et Ordonnancement: approches intégrées dans le contexte de la transition numérique 
+ & 6 & ORIGIN, P2LS & $\{11,12\}$\\ 
+ 
+ 30 & Optimisation dans les réseaux énergétiques intelligents 
+ & 4 & OR & $\{9\}$ \\ 
+ 
+ 31 & Programmation stochastique
+ & 13 & COSMOS, DOR & $\{6,19\}$  \\
+ 
+ 32 & Planification de la production et des approvisionnements sous incertitude & 3 & & $\emptyset$\\ 
+ 
+ 33 & Micro-réseaux industriels 
+ & 4 & & $\emptyset$ \\ 
+ 
+ 34 &Optimisation énergétique, consommation et alimentation des infrastructures numériques
+ & 9 & SCALE & \{18\}\\
+ 
+ 35 & (Hyper)graphes et applications
+ & 5 & CAGDO & \{10\} \\
+
+ 36 & Prise en compte de contraintes environnementales dans l'industrie
+ & 4 & ROES & $\{5\}$\\ 
+ 
+ 37 & Méthodes exactes pour les problèmes d'ordonnancement (merged) 
+ & 11 & GOTHA & $\{16\}$ \\ 
+ 
+ 38 & RO Environnement \& Société (merged)
+ & 6 & ROES, ROET & $\{4,5\}$\\
+ 
+ 39 & Problème de logistique en milieu urbain 
+ 
+ & 6 & GT2L, P2LS & \{8,12\} \\
+
+ 40 &Programmation par contraintes et intelligence artificielle 
+ & 8 & ROCT, META & \{7,15\} \\
+ 
+ 
+ \hline
+\end{tabular}
+\end{center}
+
+- The maximum number of authorized papers for each slot is reported in the following table\footnote{npMax(7) was initially set to 4 but was reduced to 3 by the comittee chair to avoid tight schedules especially since a dinner gala is planned in the last day of the conference after the end of the last parallel sessions. %Note that this particular value in the case of ROADEF can be used to enforce additional constraints that can help reduce the search space and similar constraints can be enforced for other values which are lower than 6 since $L=\{3,..,6\}$
+}:
+
+\begin{center}
+\begin{tabular}{ |c|ccccccc| } 
+ \hline
+ \textbf{Slot c} & 1 & 2 & 3 & 4 & 5 & 6 & 7 \\ 
+ \textbf{npMax(c)} & 4 & 6 & 6 & 4 & 4 & 5 & 3  \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+
+
+\textbf{Variables}\\
+
+- $x_{(s,c,l)} $ is true if session $s\in S$ is allocated to slot $c\in C$ with $l\in L$ papers \\
+
+
+- $y_{(s_1,s_2,c,g)}$ is true if there is a conflict for group $g\in G$ associated to sessions $(s_1,s_2)\in S^2$ ($s_1<s_2$), i.e. $g\in WG(s_1)\cap WG(s_2)$, in working slot $c\in C$\\
+
+
+\textbf{Objective}\\
+We want to minimize the number of working-group conflicts in the schedule:
+$$max \sum_{\substack{(s_1,s_2,c,g)\in S\times S\times C\times G \\ s1<s2 \\ g\in WG(s_1)\cap WG(s_2)}} \overline{y_{(s_1,s_2,c,g)}}$$
+
+
+\textbf{Constraints}\\
+
+1 - At most one amount of papers chosen for a (session, slot) pair:
+$$\sum_{l\in L} x_{(s,c,l)}\leq 1 \qquad \forall (s,c)\in S\times C$$ 
+
+2 - The subdivision of a session into slots covers all the papers in the session:
+$$ \sum_{\substack{c\in C\\ l\in L}} x_{(s,c,l)}*l  = np(s)   \qquad \forall s\in S$$
+
+3 - The subdivision respects the maximum length of each slot:
+%$$npMin(c) \leq x_{(s,c,l)}*l \leq npMax(c)\qquad \forall (s,c,l)\in S\times C\times L$$ 
+$$ x_{(s,c,l)}*l \leq npMax(c)\qquad \forall (s,c,l)\in S\times C\times L$$ 
+
+The constraint above can be easily rewritten in CNF form as follows:
+$$\bigwedge_{\substack{l\in L\\ l>npMax(c)}}\overline{x(s,c,l)} \qquad \forall (s,c)\in S\times C$$ 
+
+4 - The number of parallel sessions is not exceeded (or is equal ?) for each slot:
+$$\sum_{\substack{s\in S\\ l\in L}} x_{(s,c,l)} \leq n \qquad \forall c \in C$$ 
+
+5 - Two sessions associated to the same group and allocated to the same slot implies a conflict:
+$$\hspace*{-3.5cm} (\sum_{l\in L} x_{(s_1,c,l)} \geq 1 \,\bigwedge\; \sum_{l\in L} x_{(s_2,c,l)}\geq 1) \implies y_{(s_1,s_2,c,g)} \qquad \forall (s_1,s_2,c,g)\in S\times S\times C\times G\text{ s.t } s1<s2\text{ and } g\in WG(s_1)\cap WG(s_2)$$    
+
+We can rewrite the last constraint as  follows:
+\begin{equation*} \hspace{-2cm}
+\begin{aligned}
+(\sum_{l\in L} x_{(s_1,c,l)} \geq 1 \,\bigwedge\; \sum_{l\in L} x_{(s_2,c,l)}\geq 1) \implies y_{(s_1,s_2,c,g)}
+& = \overline {\sum_{l\in L} x_{(s_1,c,l)} \geq 1 \,\bigwedge\; \sum_{l\in L} x_{(s_2,c,l)}\geq 1} \bigvee y_{(s_1,s_2,c,g)} \\
+& = \overline {\sum_{l\in L} x_{(s_1,c,l)} \geq 1 }\bigvee\overline{ \sum_{l\in L} x_{(s_2,c,l)}\geq 1} \bigvee y_{(s_1,s_2,c,g)}\\
+& = \sum_{l\in L} x_{(s_1,c,l)} = 0\bigvee \sum_{l\in L} x_{(s_2,c,l)} = 0\bigvee y_{(s_1,s_2,c,g)}\\
+& = (\bigwedge_{l\in L} \overline{x_{(s_1,c,l)}} )\bigvee (\bigwedge_{l\in L} \overline{x_{(s_2,c,l)}})\bigvee
+y_{(s_1,s_2,c,g)}
+\end{aligned}
+\end{equation*}
+
+Therefore, we can either transform the formula above in CNF form by distributivity of $\land$ and $\lor$, or (preferably ...) we can add the following rewriting (after transformation into CNF form) : $$z_{(s,c)}\Leftrightarrow \bigwedge_{l\in L} \overline{x_{(s,c,l)}} \qquad \forall (s,c)\in S\times C$$
+Where $z_{(s,c)}$ is a new variables for each pair $(s, c)\in S\times C$ which will be informally set to true if the session $s$ is not allocated to the slot $c$ and, as such, we can change the last constraint as follows : 
+$$ z_{(s_1,c)}\vee z_{(s_2,c)} \vee y_{(s_1,s_2,c,g)} \qquad \forall (s_1,s_2,c,g)\in S\times S\times C\times G\text{ s.t } s1<s2\text{ and } g\in WG(s_1)\cap WG(s_2)$$
+
+Furthermore, this rewriting can enable us to reduce the size of constraint 4 as follows :
+
+$$\sum_{\substack{s\in S}} \overline{z_{(s,c)}} \leq n \qquad \forall c \in C$$ 
+
+\newpage
+
+
+
+\textbf{Conversion of the Equivalence into Conjunctive Normal Form (CNF)}\\
+        $$z_{(s,c)}\Leftrightarrow \bigwedge_{l\in L} \overline{x_{(s,c,l)}} \qquad \forall (s,c)\in S\times C$$
+        
+
+
+
+$$ \left( z_{(s,c)} \Longrightarrow \bigwedge_{l\in L} \overline{x_{(s,c,l)}} \right) \wedge \left( \bigwedge_{l\in L} \overline{x_{(s,c,l)}} \Longrightarrow z_{(s,c)} \right) \quad \forall (s,c)\in S\times C $$
+
+$$\left(\overline{z_{(s,c)}} \vee \left(\bigwedge_{l\in L} \overline{x_{(s,c,l)}}\right) \right)\wedge \left( \overline{\left(\bigwedge_{l\in L} \overline{x_{(s,c,l)}}\right)} \vee z_{(s,c)} \right)  $$
+\textbf{The final CNF formula}\\
+$$\left(\overline{z_{(s,c)}} \vee \overline{x_{(s,c,l)}}\right)
+ \wedge \left(\overline{z_{(s,c)}} \vee \overline{x_{(s,c,l)}}\right)\wedge ....... \wedge \left(\bigvee_{l\in L} x_{(s,c,l)} \vee z_{(s,c)}\right)$$
+    
+
+\end{document}
