@@ -179,5 +179,11 @@ for s1 in range(1, conference_sessions + 1):
                     constraints.append([x_var, y_var])
 
 
+
+for i in range (1,5):
+    constraints.append(var_z(34,i))
+
 constraints.to_file('output.cnf')
+# add thursday constraint 
 # decodage de var_x
+# add constraitn z(34,[1,2,3])
