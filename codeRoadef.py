@@ -41,10 +41,14 @@ np_s = session_papers[1]
 # print(np_s)
 
 def var_x(s, c, l):
-    s_index = conference_sessions * slots * len(papers_range)
-    c_index = slots * len(papers_range)
-    l_index = len(papers_range)
-    return s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (len(papers_range) - l)
+    return (s-1)*slots * len(papers_range)  + (c-1)*len(papers_range) + l
+    # can work with this code also
+    # s_index = conference_sessions * slots * len(papers_range)
+    # c_index = slots * len(papers_range)
+    # l_index = len(papers_range)
+    # return s_index - (conference_sessions - s) * c_index - (slots - c) * l_index - (len(papers_range) - l)
+    
+    
 
 max_var_x = var_x(conference_sessions, slots, len(papers_range))
 
