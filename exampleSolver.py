@@ -1,14 +1,19 @@
-from pysat.formula import CNF
-from pysat.solvers import Solver
+from pysat.examples.rc2 import RC2
+from pysat.formula import WCNF
+
+# Step 1: Load the WCNF file
+wcnf = WCNF(from_file='output.cnf')
 
 
-cnf = CNF()
+with RC2(wcnf) as solver:
+    is_sat = solver.compute()
+
+    if is_sat:
+       
+        model = solver.model
+        
+        print("Solution:", model)
+    else:
+        print("No solution found")
 
 
-cnf.append([-1, -2])  
-cnf.append([-2, -3])  
-cnf.append([-3, 4])  
-cnf.append([1, 4])    
-
-# Write to a CNF file
-cnf.to_file('exampleSolver.cnf')

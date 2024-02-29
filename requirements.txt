@@ -1,0 +1,9 @@
+sudo apt install python3-pip
+sudo apt install python3-numpy
+# create virtual envirement 
+sudo apt-get install python3 python3-venv
+# to use haithem virtual envirement 
+python3 -m venv ~/haithemVirtualEnv
+source ~/haithemVirtualEnv/bin/activate
+# install pysat libraries
+pip install python-sat[pblib,aiger]
