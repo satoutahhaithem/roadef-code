@@ -1,7 +1,7 @@
 from pysat.examples.rc2 import RC2
 from pysat.formula import WCNF
 
-# Step 1: Load the WCNF file
+
 wcnf = WCNF(from_file='output.cnf')
 
 

@@ -9,19 +9,19 @@ import ssl
 
 
 
-# conference_sessions = 40
-# slots = 7
-# papers_range = np.arange(3, 7)  
-# max_parallel_sessions = 11 
-# working_groups = 20 
-# npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
+conference_sessions = 40
+slots = 7
+papers_range = np.arange(3, 7)  
+max_parallel_sessions = 11 
+working_groups = 20 
+npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
 
-conference_sessions = 2
-slots = 2
-papers_range = np.arange(3, 4)  
-max_parallel_sessions = 2
-working_groups = 2
-npMax = {1: 4, 2: 6} 
+# conference_sessions = 2
+# slots = 2
+# papers_range = np.arange(3, 4)  
+# max_parallel_sessions = 2
+# working_groups = 2
+# npMax = {1: 4, 2: 6} 
 
 # list of groups session groups 
 session_groups = [
