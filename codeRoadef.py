@@ -1,47 +1,52 @@
 import numpy as np
-from pysat.formula import CNF , WCNF 
-from pysat.pb import PBEnc
-from pysat.card import CardEnc
-from pysat.card import EncType
-from pysat.solvers import Solver
+from pysat.formula import *
+from pysat.pb import EncType as pbenc
+from pysat.pb import *
+from pysat.card import *
+from pysat.solvers import *
 import ssl
+from pysat.examples.rc2 import RC2
+from pysat.formula import WCNF
 # print(ssl.OPENSSL_VERSION)
 
 
 
 conference_sessions = 40
 slots = 7
-papers_range = np.arange(3, 7)  
-max_parallel_sessions = 11 
+papers_range = [3,4,5,6]
+max_parallel_sessions = 11
 working_groups = 20 
-npMax = {1: 4, 2: 6, 3: 6, 4: 4, 5: 4, 6: 5, 7: 3} 
 
 # conference_sessions = 2
-# slots = 2
-# papers_range = np.arange(3, 4)  
+# slots = 1
+# papers_range = [3,4]
 # max_parallel_sessions = 2
 # working_groups = 2
-# npMax = {1: 4, 2: 6} 
-
+# np = [3,4]
+np= [14,23,12,9,9,6,10,4,10,7,6,5,3,5,6,4,3,12,7,16,4,5,14,11,4,3,10,6,6,4,13,3,4,9,5,4,11,6,6,8]
+npMax = [4, 6, 6, 4, 4, 5,  3]
+# npMax = [4, 6]
 # list of groups session groups 
 session_groups = [
-    [1], [1,2]
+    [1], [2], [3], [], [], [], [6], [7], [7, 8], [10], [8], [8, 11], [5, 8], 
+    [3, 8], [7], [13], [13], [14], [], [13], [16], [16], [20], [17], [13], 
+    [], [9], [11], [11, 12], [9], [6, 19], [], [], [18], [10], [5], [16], 
+    [4, 5], [8, 12], [7, 15]
 ]
-
 
 constraints = WCNF()
 
-def get_number_of_papers_for_session():
-    session_papers = {
-        1: 14, 2: 23, 3: 12, 4: 9, 5: 9, 6: 6, 7: 10, 8: 4, 9: 10, 10: 7,
-        11: 6, 12: 5, 13: 3, 14: 5, 15: 6, 16: 4, 17: 3, 18: 12, 19: 7, 20: 16,
-        21: 4, 22: 5, 23: 14, 24: 11, 25: 4, 26: 3, 27: 10, 28: 6, 29: 6, 30: 4,
-        31: 13, 32: 3, 33: 4, 34: 9, 35: 5, 36: 4, 37: 11, 38: 6, 39: 6, 40: 8
-    }
-    return session_papers
+# def get_number_of_papers_for_session():
+#     session_papers = {
+#         1: 14, 2: 23, 3: 12, 4: 9, 5: 9, 6: 6, 7: 10, 8: 4, 9: 10, 10: 7,
+#         11: 6, 12: 5, 13: 3, 14: 5, 15: 6, 16: 4, 17: 3, 18: 12, 19: 7, 20: 16,
+#         21: 4, 22: 5, 23: 14, 24: 11, 25: 4, 26: 3, 27: 10, 28: 6, 29: 6, 30: 4,
+#         31: 13, 32: 3, 33: 4, 34: 9, 35: 5, 36: 4, 37: 11, 38: 6, 39: 6, 40: 8
+#     }
+#     return session_papers
 
-session_papers = get_number_of_papers_for_session()
-np_s = session_papers[1]
+# session_papers = get_number_of_papers_for_session()
+# np_s = session_papers[1]
 # print(np_s)
 
 def var_x(s, c, l):
@@ -57,13 +62,11 @@ def var_x(s, c, l):
 
 
 def var_z(s, c):
-    max_var_x = var_x(conference_sessions, slots, len(papers_range))
-    z_offset = max_var_x + 1  # Start after the last x variable
-    
+    max_var_x = var_x(conference_sessions, slots, len(papers_range))    
   
-    return z_offset + conference_sessions*slots - (conference_sessions-s)*slots - (slots - c)
+    # return max_var_x + conference_sessions*slots - (conference_sessions-s)*slots - (slots - c)
     # work also with this 
-    # return z_offset + (s - 1) * slots + c
+    return max_var_x + (s - 1) * slots + c
 
 max_var_z = var_z(conference_sessions, slots)
 # fixed y problem 
@@ -83,46 +86,74 @@ max_var_z = var_z(conference_sessions, slots)
     # unique_index = ((s1 - 1) * conference_sessions + (s2 - 1)) * slots * working_groups + (c - 1) * working_groups + (g - 1) 
     # return y_offset + unique_index
 
+y_var = var_z(conference_sessions,slots)    #last varliable + x+y
 
-# the first constraint
+
+# # the first constraint
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
+        vars_for_s_c = []
+        for l in range(1,len(papers_range)+1):
         # i modify paper range to len(paperRange) , 
-        vars_for_s_c = [var_x(s, c, l) for l in [x for x in range(1,len(papers_range))]]
-        # Ensure that vars_for_s_c contains integers
-        vars_for_s_c = [var for var in vars_for_s_c]  # Convert all variables to integers
-        #add global varibale here EncType.pairwise
-        amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, encoding=EncType.pairwise)
+            vars_for_s_c.append(var_x(s, c, l))
+            # Ensure that vars_for_s_c contains integers
+            #add global varibale here EncType.pairwise
+        amo_clause = CardEnc.atmost(lits=vars_for_s_c, bound=1, top_id=y_var,encoding=EncType.cardnetwrk) 
+        y_var=amo_clause.nv
         constraints.extend(amo_clause.clauses)
+
+
+
 
 
 
 # penser a
 # the second constraint
-for s in range(1, conference_sessions + 1):
+for s in range(1, conference_sessions +1):
     aux_vars = []  
-    weights = []   
+    for c in range(1,slots + 1):
+        for l in range(1,len(papers_range)+1):
+            for i in range(papers_range[l-1]):
+                aux_vars.append(var_x(s, c, l))
+            # print ("THe aux var var ", aux_vars)
 
-    for c in range(slots + 1):
-        for i in range(len(papers_range)):
-            aux_vars.append(var_x(s, c, i+1))
-            weights.append(papers_range[i])  
+            #weights.append(papers_range[l-1])  
+            # print ("the weights ", weights)
 
-   
-    equals_clause = PBEnc.equals(lits=aux_vars, weights=weights, bound=session_papers[s])
-    constraints.extend(equals_clause.clauses)
+    
+    eq_clause = CardEnc.equals(lits=aux_vars, bound=np[s-1], top_id=y_var, encoding=EncType.cardnetwrk)
+    #equals_clause = PBEnc.equals(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
+    # equals_clause = PBEnc.atleast(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
+    y_var=eq_clause.nv
+    constraints.extend(eq_clause.clauses)
 
-# print(constraints)
+
+
+
+# # print(constraints)
 
 # 3 eme constraint
 
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
-        for l in papers_range:
-            if l > npMax[c]:
+        for l in range(1,len(papers_range)+1):
+            if papers_range[l-1] > npMax[c-1]:
                # j'ai travailler avec la conjunction des negation de x if l>npMax(c)
                 constraints.append([-var_x(s, c, l)])
 
+
+# The Fourth constraint
+for c in range(1, slots + 1):
+    neg_z_vars = []
+    for s in range(1, conference_sessions + 1):
+        neg_z_vars.append(-var_z(s, c))
+    # Convert all variables in neg_z_vars to integers
+    ## verify this int () cause 
+    # Ensure max_parallel_sessions is an integer
+    ## do global variable 
+    atmost_clause = CardEnc.atmost(lits=neg_z_vars, bound=max_parallel_sessions, top_id=y_var, encoding=EncType.cardnetwrk)
+    y_var=atmost_clause.nv
+    constraints.extend(atmost_clause.clauses)
 
 
 
@@ -130,41 +161,28 @@ for s in range(1, conference_sessions + 1):
 for s in range(1, conference_sessions + 1):
     for c in range(1, slots + 1):
         z_var = var_z(s, c)
-        x_vars = [var_x(s, c, l) for l in papers_range]
+        x_vars=[]
+        for l in range(1,len(papers_range)+1):
+            x_vars.append(var_x(s, c, l))
+        or_clause = x_vars + [z_var]
+        constraints.append(or_clause)
 
-        
         for x in x_vars:
             constraints.append([-z_var, -x])
             # modified 
-        or_clause = [x for x in x_vars] + [z_var]
-        constraints.append(or_clause)
 
 
 ## code added
 
 
-# The Fourth constraint
-for c in range(1, slots + 1):
-    neg_z_vars = [-var_z(s, c) for s in range(1, conference_sessions + 1)]
-    # Convert all variables in neg_z_vars to integers
-    ## verify this int () cause 
-    neg_z_vars = [int(var) for var in neg_z_vars]
-    # Ensure max_parallel_sessions is an integer
-    max_parallel_sessions_int = int(max_parallel_sessions)
-    ## do global variable 
-    atmost_clause = CardEnc.atmost(lits=neg_z_vars, bound=max_parallel_sessions_int, encoding=EncType.seqcounter)
-    constraints.extend(atmost_clause.clauses)
-
-
 
 # write this to file // remember this 
 # i add this also for the offset
-y_var = var_z(conference_sessions,slots)    #last varliable + x+y
 ## here soft constraints
 for s1 in range(1, conference_sessions + 1):
     for s2 in range(s1 + 1, conference_sessions + 1):  # Ensure s1 < s2
+        common_groups = set(session_groups[s1 - 1]).intersection(session_groups[s2 - 1])
         for c in range(1, slots + 1):
-            common_groups = set(session_groups[s1 - 1]).intersection(session_groups[s2 - 1])
             for g in common_groups:
                 #y_var = var_y(s1, s2, c, g)
                 y_var = y_var + 1
@@ -178,8 +196,18 @@ for s1 in range(1, conference_sessions + 1):
 for i in range (1,5):
     constraints.append([var_z(34,i)])
 
-constraints.to_file('output.cnf')
-#verfier mlih 
+
+constraints.to_file("file.cnf")
+
+with RC2(constraints,solver="Cadical153") as solver:
+
+    for m in solver.enumerate() :
+        print('model has cost {0}'.format(solver.cost))
+        break
+    
+    
+    # verfier mlih 
+
 # add thursday constraint 
 # decodage de var_x
 # rename the len(paperrange) in variable
@@ -188,3 +216,16 @@ constraints.to_file('output.cnf')
 # write script tp generate the new formule a
 # test rc2
 # look at the new variant
+# second constraint do it with encodage pseudo boolean 
+# do it with excel 
+# solver essay avec maxcdcdl 
+#decodage 
+
+
+# from pysat.examples.fm import FM
+
+# # wcnf = WCNF(from_file='file.cnf')
+# fm = FM(constraints, verbose=0)
+# fm.compute()  # set of hard clauses should be satisfiable
+# print(fm.cost) # cost of MaxSAT solution should be 2
+# # print(fm.model)
