@@ -239,8 +239,38 @@ def display_assignments_by_slot_with_counts(model, slots, papers_range, conferen
                 total_sessions_displayed += 1
             else:
                 break  # Stop if the slot or total limit is reached
+def detect_conflicts(model, slots, conference_sessions, session_groups):
+    # Initialize a dictionary to store the groups associated with each session in each slot
+    slot_group_sessions = {c: {} for c in range(1, slots + 1)}
 
-# Run the solver and process the results
+    # Populate the dictionary based on the model's assignments
+    for var in model:
+        if var > 0:
+            s, c, _ = decode_var_x(var, slots, len(papers_range))
+            for g in session_groups[s - 1]:
+                if g not in slot_group_sessions[c]:
+                    slot_group_sessions[c][g] = [s]
+                else:
+                    slot_group_sessions[c][g].append(s)
+
+    # Detect conflicts
+    conflicts = []
+    for c, groups in slot_group_sessions.items():
+        for g, sessions in groups.items():
+            if len(sessions) > 1:
+                conflicts.append((c, g, sessions))
+
+    return conflicts
+
+# Function to display conflicts
+def display_conflicts(conflicts):
+    if conflicts:
+        print("Conflicts detected:")
+        for slot, group, sessions in conflicts:
+            print(f"Conflict in slot {slot} for group {group} in sessions {', '.join(map(str, sessions))}")
+    else:
+        print("No conflicts detected.")
+
 with RC2(constraints, solver="Cadical153") as solver:
     for model in solver.enumerate():
         print('Model has cost:', solver.cost)
@@ -271,3 +301,21 @@ with RC2(constraints, solver="Cadical153") as solver:
 # fm.compute()  # set of hard clauses should be satisfiable
 # print(fm.cost) # cost of MaxSAT solution should be 2
 # # print(fm.model)
+import pandas as pd
+
+# Assuming you have a function that returns the model results in a structured format:
+# Example format: [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}, ...]
+def get_model_results():
+    # This function should return the results from your model.
+    # For now, it's just an example placeholder.
+    return [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}]
+
+# Convert the results to a pandas DataFrame
+results = get_model_results()
+df = pd.DataFrame(results)
+
+# Writing DataFrame to an Excel file
+excel_path = './file.xlsx'  # Replace with your file path
+df.to_excel(excel_path, index=False)
+
+print(f"Results have been written to {excel_path}")
