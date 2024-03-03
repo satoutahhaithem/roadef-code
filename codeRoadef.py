@@ -16,23 +16,26 @@ slots = 7
 papers_range = [3,4,5,6]
 max_parallel_sessions = 11
 working_groups = 20 
-
-# conference_sessions = 2
-# slots = 1
-# papers_range = [3,4]
-# max_parallel_sessions = 2
-# working_groups = 2
-# np = [3,4]
 np= [14,23,12,9,9,6,10,4,10,7,6,5,3,5,6,4,3,12,7,16,4,5,14,11,4,3,10,6,6,4,13,3,4,9,5,4,11,6,6,8]
 npMax = [4, 6, 6, 4, 4, 5,  3]
-# npMax = [4, 6]
-# list of groups session groups 
 session_groups = [
     [1], [2], [3], [], [], [], [6], [7], [7, 8], [10], [8], [8, 11], [5, 8], 
     [3, 8], [7], [13], [13], [14], [], [13], [16], [16], [20], [17], [13], 
     [], [9], [11], [11, 12], [9], [6, 19], [], [], [18], [10], [5], [16], 
     [4, 5], [8, 12], [7, 15]
 ]
+# conference_sessions = 2
+# slots = 3
+# papers_range = [3,4]
+# max_parallel_sessions = 2
+# working_groups = 2
+# np = [3,4]
+# npMax = [4, 6, 6, 4, 4, 5,  3]
+# session_groups = [
+#     [1,2], [2,1]
+# ]
+# list of groups session groups 
+
 
 constraints = WCNF()
 
@@ -59,7 +62,14 @@ def var_x(s, c, l):
     
     
 
-
+# function to decode var_x
+def decode_var_x(x, slots, papers_range_length):
+    x -= 1  # Adjusting because the original function seems 1-indexed
+    l = x % papers_range_length + 1
+    x //= papers_range_length
+    c = x % slots + 1
+    s = x // slots + 1
+    return s, c, l
 
 def var_z(s, c):
     max_var_x = var_x(conference_sessions, slots, len(papers_range))    
@@ -199,13 +209,45 @@ for i in range (1,5):
 
 constraints.to_file("file.cnf")
 
-with RC2(constraints,solver="Cadical153") as solver:
 
-    for m in solver.enumerate() :
-        print('model has cost {0}'.format(solver.cost))
-        break
+
+
+# Assuming other parts of your code (constraint definitions, SAT model setup) are correctly implemented
+
+def display_assignments_by_slot_with_counts(model, slots, papers_range, conference_sessions):
+    slot_assignments = {c: {} for c in range(1, slots + 1)}  # Initialize dictionaries for each slot
+
+    # Processing the model to populate slot assignments
+    for var in model:
+        if var > 0:
+            s, c, l = decode_var_x(var, slots, len(papers_range))
+            paper_count = papers_range[l - 1]
+            if s not in slot_assignments[c]:
+                slot_assignments[c][s] = paper_count
+            else:
+                slot_assignments[c][s] += paper_count  # Accumulate paper count for the session
+
     
-    
+    total_sessions_displayed = 0
+    for slot in sorted(slot_assignments):
+        print(f"Slot {slot}:")
+        sessions_in_slot = 0
+        for session, count in sorted(slot_assignments[slot].items()):
+            if sessions_in_slot < max_parallel_sessions and total_sessions_displayed < 77:
+                print(f"  Conference Session {session} with {count} papers")
+                sessions_in_slot += 1
+                total_sessions_displayed += 1
+            else:
+                break  # Stop if the slot or total limit is reached
+
+# Run the solver and process the results
+with RC2(constraints, solver="Cadical153") as solver:
+    for model in solver.enumerate():
+        print('Model has cost:', solver.cost)
+        display_assignments_by_slot_with_counts(model, slots, papers_range, conference_sessions)
+        break  # Process only the first model
+
+
     # verfier mlih 
 
 # add thursday constraint 
