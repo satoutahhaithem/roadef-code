@@ -70,10 +70,8 @@ def decode_var_x(x, slots, papers_range_length):
     c = x % slots + 1
     s = x // slots + 1
     return s, c, l
-
-def var_z(s, c):
-    max_var_x = var_x(conference_sessions, slots, len(papers_range))    
-  
+max_var_x = var_x(conference_sessions, slots, len(papers_range))
+def var_z(s, c): 
     # return max_var_x + conference_sessions*slots - (conference_sessions-s)*slots - (slots - c)
     # work also with this 
     return max_var_x + (s - 1) * slots + c
@@ -119,24 +117,48 @@ for s in range(1, conference_sessions + 1):
 
 # penser a
 # the second constraint
+# for s in range(1, conference_sessions +1):
+#     aux_vars = []  
+#     for c in range(1,slots + 1):
+#         for l in range(1,len(papers_range)+1):
+#             for i in range(papers_range[l-1]):
+#                 aux_vars.append(var_x(s, c, l))
+#             # print ("THe aux var var ", aux_vars)
+
+#             #weights.append(papers_range[l-1])  
+#             # print ("the weights ", weights)
+
+    
+#     eq_clause = CardEnc.equals(lits=aux_vars, bound=np[s-1], top_id=y_var, encoding=EncType.cardnetwrk)
+#     #equals_clause = PBEnc.equals(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
+#     # equals_clause = PBEnc.atleast(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
+#     y_var=eq_clause.nv
+#     constraints.extend(eq_clause.clauses)
+
+
+
+
+#################################THis code of the second constraint with trhe weigth##################################
 for s in range(1, conference_sessions +1):
     aux_vars = []  
+    aux_weight = []  
     for c in range(1,slots + 1):
         for l in range(1,len(papers_range)+1):
-            for i in range(papers_range[l-1]):
-                aux_vars.append(var_x(s, c, l))
+            # for i in range(papers_range[l-1]):
+            aux_vars.append(var_x(s, c, l))
+            aux_weight.append(papers_range[l-1])
             # print ("THe aux var var ", aux_vars)
 
             #weights.append(papers_range[l-1])  
             # print ("the weights ", weights)
 
     
-    eq_clause = CardEnc.equals(lits=aux_vars, bound=np[s-1], top_id=y_var, encoding=EncType.cardnetwrk)
+    eq_clause = PBEnc.equals(lits=aux_vars, weights=aux_weight,bound=np[s-1], top_id=y_var, encoding=pbenc.best)
     #equals_clause = PBEnc.equals(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
     # equals_clause = PBEnc.atleast(lits=aux_vars, weights=weights,bound=np[s-1], top_id=max_var_z, encoding= pbenc.best)
     y_var=eq_clause.nv
     constraints.extend(eq_clause.clauses)
-
+#################################THis code of the second constraint with trhe weigth##################################
 
 
 
@@ -218,104 +240,117 @@ def display_assignments_by_slot_with_counts(model, slots, papers_range, conferen
     slot_assignments = {c: {} for c in range(1, slots + 1)}  # Initialize dictionaries for each slot
 
     # Processing the model to populate slot assignments
-    for var in model:
-        if var > 0:
-            s, c, l = decode_var_x(var, slots, len(papers_range))
-            paper_count = papers_range[l - 1]
-            if s not in slot_assignments[c]:
-                slot_assignments[c][s] = paper_count
-            else:
-                slot_assignments[c][s] += paper_count  # Accumulate paper count for the session
+    for var in range(max_var_x):
+        modelI= model[var]
+        if modelI > 0:
+            s, c, l = decode_var_x(model[var], slots, len(papers_range))
+            print(f"  Conference Session {s} in slot {c} with {papers_range[l-1]} papers ")          
+            # paper_count = papers_range[l - 1]
+            # if s not in slot_assignments[c]:
+            #     slot_assignments[c][s] = paper_count
+            # else:
+            #     slot_assignments[c][s] += paper_count  # Accumulate paper count for the session
 
     
-    total_sessions_displayed = 0
-    for slot in sorted(slot_assignments):
-        print(f"Slot {slot}:")
-        sessions_in_slot = 0
-        for session, count in sorted(slot_assignments[slot].items()):
-            if sessions_in_slot < max_parallel_sessions and total_sessions_displayed < 77:
-                print(f"  Conference Session {session} with {count} papers")
-                sessions_in_slot += 1
-                total_sessions_displayed += 1
-            else:
-                break  # Stop if the slot or total limit is reached
-def detect_conflicts(model, slots, conference_sessions, session_groups):
-    # Initialize a dictionary to store the groups associated with each session in each slot
-    slot_group_sessions = {c: {} for c in range(1, slots + 1)}
+    # total_sessions_displayed = 0
+    # for slot in sorted(slot_assignments):
+    #     print(f"Slot {slot}:")
+    #     sessions_in_slot = 0
+    #     for session, count in sorted(slot_assignments[slot].items()):
+    #         if sessions_in_slot < max_parallel_sessions and total_sessions_displayed < 77:
+    #             print(f"  Conference Session {session} with {count} papers")
+    #             sessions_in_slot += 1
+    #             total_sessions_displayed += 1
+    #         else:
+    #             break  # Stop if the slot or total limit is reached
+# def detect_conflicts(model, slots, conference_sessions, session_groups):
+#     # Initialize a dictionary to store the groups associated with each session in each slot
+#     slot_group_sessions = {c: {} for c in range(1, slots + 1)}
 
-    # Populate the dictionary based on the model's assignments
-    for var in model:
-        if var > 0:
-            s, c, _ = decode_var_x(var, slots, len(papers_range))
-            for g in session_groups[s - 1]:
-                if g not in slot_group_sessions[c]:
-                    slot_group_sessions[c][g] = [s]
-                else:
-                    slot_group_sessions[c][g].append(s)
+#     # Populate the dictionary based on the model's assignments
+#     for var in model:
+#         if var > 0:
+#             s, c, _ = decode_var_x(var, slots, len(papers_range))
+#             for g in session_groups[s - 1]:
+#                 if g not in slot_group_sessions[c]:
+#                     slot_group_sessions[c][g] = [s]
+#                 else:
+#                     slot_group_sessions[c][g].append(s)
 
-    # Detect conflicts
-    conflicts = []
-    for c, groups in slot_group_sessions.items():
-        for g, sessions in groups.items():
-            if len(sessions) > 1:
-                conflicts.append((c, g, sessions))
+#     # Detect conflicts
+#     conflicts = []
+#     for c, groups in slot_group_sessions.items():
+#         for g, sessions in groups.items():
+#             if len(sessions) > 1:
+#                 conflicts.append((c, g, sessions))
 
-    return conflicts
+#     return conflicts
 
-# Function to display conflicts
-def display_conflicts(conflicts):
-    if conflicts:
-        print("Conflicts detected:")
-        for slot, group, sessions in conflicts:
-            print(f"Conflict in slot {slot} for group {group} in sessions {', '.join(map(str, sessions))}")
-    else:
-        print("No conflicts detected.")
+# # Function to display conflicts
+# def display_conflicts(conflicts):
+#     if conflicts:
+#         print("Conflicts detected:")
+#         for slot, group, sessions in conflicts:
+#             print(f"Conflict in slot {slot} for group {group} in sessions {', '.join(map(str, sessions))}")
+#     else:
+#         print("No conflicts detected.")
 
 with RC2(constraints, solver="Cadical153") as solver:
     for model in solver.enumerate():
         print('Model has cost:', solver.cost)
+        # print('Model:', solver.model)
+
         display_assignments_by_slot_with_counts(model, slots, papers_range, conference_sessions)
         break  # Process only the first model
 
 
-    # verfier mlih 
+#     # verfier mlih 
 
-# add thursday constraint 
-# decodage de var_x
-# rename the len(paperrange) in variable
-# try with rc2 solver 
-# read this https://pysathq.github.io/docs/html/api/examples/rc2.html
-# write script tp generate the new formule a
-# test rc2
-# look at the new variant
-# second constraint do it with encodage pseudo boolean 
-# do it with excel 
-# solver essay avec maxcdcdl 
-#decodage 
+# # add thursday constraint 
+# # decodage de var_x
+# # rename the len(paperrange) in variable
+# # try with rc2 solver 
+# # read this https://pysathq.github.io/docs/html/api/examples/rc2.html
+# # write script tp generate the new formule a
+# # test rc2
+# # look at the new variant
+# # second constraint do it with encodage pseudo boolean 
+# # do it with excel 
+# # solver essay avec maxcdcdl 
+# #decodage 
 
 
-# from pysat.examples.fm import FM
+# # from pysat.examples.fm import FM
 
-# # wcnf = WCNF(from_file='file.cnf')
-# fm = FM(constraints, verbose=0)
-# fm.compute()  # set of hard clauses should be satisfiable
-# print(fm.cost) # cost of MaxSAT solution should be 2
-# # print(fm.model)
-import pandas as pd
+# # # wcnf = WCNF(from_file='file.cnf')
+# # fm = FM(constraints, verbose=0)
+# # fm.compute()  # set of hard clauses should be satisfiable
+# # print(fm.cost) # cost of MaxSAT solution should be 2
+# # # print(fm.model)
+# import pandas as pd
 
-# Assuming you have a function that returns the model results in a structured format:
-# Example format: [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}, ...]
-def get_model_results():
-    # This function should return the results from your model.
-    # For now, it's just an example placeholder.
-    return [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}]
+# # Assuming you have a function that returns the model results in a structured format:
+# # Example format: [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}, ...]
+# def get_model_results():
+#     # This function should return the results from your model.
+#     # For now, it's just an example placeholder.
+#     return [{'slot': 1, 'session': 1, 'papers': 4}, {'slot': 1, 'session': 2, 'papers': 5}]
 
-# Convert the results to a pandas DataFrame
-results = get_model_results()
-df = pd.DataFrame(results)
+# # Convert the results to a pandas DataFrame
+# results = get_model_results()
+# df = pd.DataFrame(results)
 
-# Writing DataFrame to an Excel file
-excel_path = './file.xlsx'  # Replace with your file path
-df.to_excel(excel_path, index=False)
+# # Writing DataFrame to an Excel file
+# excel_path = './file.xlsx'  # Replace with your file path
+# df.to_excel(excel_path, index=False)
 
-print(f"Results have been written to {excel_path}")
+
+# print(f"Results have been written to {excel_path}")
+    
+
+# on va renommer les output comme ca 
+# propre repository
+# on a 3 fichier :
+# une fichier cnf contenant la formule du style roadef_s40_c7_n11.cnf
+# un fichier retour du solver Maxcdcl\RC2\openwbo Maxcdcl_roadef_s40_c7_n11.txt (1h max pour la résolution)
+# un fichier avec les affectations 
